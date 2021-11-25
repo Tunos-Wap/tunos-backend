@@ -81,6 +81,16 @@ const strategy = new JWTStrategy(jwtOptions, (jwt_payload, done) => {
 
 passport.use(strategy);
 
+// Include Routes.
+const indexRouter = require('./routes/index');
+const projectsRouter = require('./routes/projects');
+const usersRouter = require('./routes/users');
+const tasksRouter = require('./routes/tasks');
+
+app.use('/', indexRouter);
+app.use('/projects', projectsRouter);
+app.use('/users', usersRouter);
+app.use('/tasks', tasksRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -89,6 +99,7 @@ app.use(function (req, res, next) {
 
 // error handler
 app.use(function (err, req, res, next) {
+    console.log(err);
     // set locals, only providing error in development
     res.locals.message = err.message;
     res.locals.nav = '404';
