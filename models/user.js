@@ -26,13 +26,13 @@ const User = mongoose.Schema({
         type: String,
         default: '',
         trim: true,
-        required: 'Display Name is required'
+        required: 'Last Name is required'
     },
     phone_number: {
         type: String,
         default: '',
         trim: true,
-        required: 'Display Name is required'
+        required: 'Phone Number is required'
     },
     created_at: {
         type: Date,

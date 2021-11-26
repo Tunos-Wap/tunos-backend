@@ -36,39 +36,17 @@ module.exports.processLoginPage = (req, res, next) => {
         (err, user, info) => {
             // server err?
             if (err) {
-                return next(err);
+                return res.status(500).json({ error: true, msg: 'Server encountered Error!' });
             }
             // is there a user login error?
             if (!user) {
                 return res.status(500).json({ error: true, msg: 'User failed Logged in!' });
             }
-            req.login(user, (err) => {
-                // server error?
-                if (err) {
-                    return next(err);
-                }
-
-                const payload =
-                {
-                    email: user.email,
-                    password: user.password,
-                }
-
-                const authToken = jwt.sign(payload, DB.Secret, {
-                    expiresIn: 604800 // 1 week
-                });
-
-                res.json({
-                    success: true,
-                    msg: 'User Logged in Successfully!',
-                    user: {
-                        email: req.body.email,
-                        first_name: req.body.first_name,
-                        last_name: req.body.last_name,
-                        email: user.email
-                    },
-                    token: authToken
-                });
+            res.json({
+                success: true,
+                msg: 'User Logged in Successfully!',
+                user: user,
+                token: getJWTToken(user.email, user.password)
             });
         }
     )(req, res, next);
@@ -86,52 +64,34 @@ module.exports.displayRegisterPage = (req, res, next) => {
 }
 
 module.exports.processRegisterPage = (req, res, next) => {
-    console.log(req.body);
     // instantiate a user object
     let newUser = new User({
         email: req.body.email,
         password: req.body.password,
         first_name: req.body.first_name,
         last_name: req.body.last_name,
-        phone_number: req.body.phone_number
+        phone_number: req.body.phone_number,
+        username: req.body.username
     });
-    
-    User.register(newUser, req.body.password, (err) => {
-        if (err) {
 
-            req.json("Error: Inserting New User");
+    User.findOne({ email: newUser.email }).then(existingUser => {
+        if (existingUser) {
+            return res.status(500).json({ error: true, msg: 'This email is already registered with us.' });
+        } else {
+            const user = new User(newUser);
 
-            if (err.name == "UserExistsError") {
-                req.json({
-                    msg: 'Registration Error: User Already Exists!'
-                });
-                req.json('Error: User Already Exists!')
-            } else {
-                return res.json({
-                    title: 'Register',
-                    msg: 'registerErrorMessage'
-                });
-            }
-        }
-        else {
-            // if no error exists, then registration is successful
-
-            // redirect the user and authenticate them
-
-            /* TODO - Getting Ready to convert to API
-            res.json({success: true, msg: 'User Registered Successfully!'});
-            */
-
-            return passport.authenticate('local')(req, res, () => {
+            user.save().then(userNew => {
                 res.json({
                     success: true,
-                    msg: 'User Registered Successfully!',
-                    username: req.username,
-                    email: req.email
+                    msg: 'You are Registered Successfully!',
+                    userInfo: userNew,
+                    authToken: getJWTToken(newUser.email, newUser.password)
                 });
-            });
+            }).catch(error => {
+                return res.status(500).json({ error: true, msg: error.message });
+            })
         }
-    });
+    })
 }
 
 module.exports.performLogout = (req, res, next) => {
@@ -140,4 +100,15 @@ module.exports.performLogout = (req, res, next) => {
     req.json({
         msg: 'You are log out successfully!'
     });
+}
+
+function getJWTToken(email, password) {
+    const payload = {
+        email: email,
+        password: password,
+    }
+    const authToken = jwt.sign(payload, DB.Secret, {
+        expiresIn: 604800 // 1 week
+    });
+    return authToken;
 }
