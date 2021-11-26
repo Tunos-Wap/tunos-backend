@@ -22,7 +22,8 @@ exports.index = (req, res, next) => {
             return res.send({
                 success: true,
                 message: 'Tasks successfully found.',
-                data: taskList
+                data: taskList, 
+                displayName: req.user ? req.user.displayName : ''
             });
         }
     });
@@ -50,7 +51,8 @@ module.exports.details = (req, res, next) => {
             return res.send({
                 success: true,
                 message: 'Task successfully found.',
-                data: task
+                data: task, 
+                displayName: req.user ? req.user.displayName : ''
             });
         }
     });
@@ -91,7 +93,8 @@ module.exports.create = (req, res, next) => {
         return res.send({
             success: true,
             message: 'Task successfully created.',
-            data: Task
+            data: Task, 
+            displayName: req.user ? req.user.displayName : ''
         });
     });
 }
@@ -133,7 +136,8 @@ module.exports.update = (req, res, next) => {
         return res.send({
             success: true,
             message: 'Task successfully updated.',
-            data: []
+            data: [], 
+            displayName: req.user ? req.user.displayName : ''
         });
     });
 }
@@ -159,7 +163,8 @@ module.exports.delete = (req, res, next) => {
         return res.send({
             success: true,
             message: 'Task successfully deleted.',
-            data: []
+            data: [], 
+            displayName: req.user ? req.user.displayName : ''
         });
     });
 }

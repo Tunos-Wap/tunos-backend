@@ -22,7 +22,8 @@ exports.index = (req, res, next) => {
             return res.send({
                 success: true,
                 message: 'Projects successfully found.',
-                data: projectList
+                data: projectList, 
+                displayName: req.user ? req.user.displayName : ''
             });
         }
     });
@@ -50,7 +51,8 @@ module.exports.details = (req, res, next) => {
             return res.send({
                 success: true,
                 message: 'Project successfully found.',
-                data: project
+                data: project, 
+                displayName: req.user ? req.user.displayName : ''
             });
         }
     });
@@ -89,7 +91,8 @@ module.exports.create = (req, res, next) => {
         return res.send({
             success: true,
             message: 'Project successfully created.',
-            data: Project
+            data: Project, 
+            displayName: req.user ? req.user.displayName : ''
         });
     });
 }
@@ -129,7 +132,8 @@ module.exports.update = (req, res, next) => {
         return res.send({
             success: true,
             message: 'Project successfully updated.',
-            data: []
+            data: [], 
+            displayName: req.user ? req.user.displayName : ''
         });
     });
 }
@@ -155,7 +159,8 @@ module.exports.delete = (req, res, next) => {
         return res.send({
             success: true,
             message: 'Project successfully deleted.',
-            data: []
+            data: [], 
+            displayName: req.user ? req.user.displayName : ''
         });
     });
 }
