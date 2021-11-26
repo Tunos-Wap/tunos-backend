@@ -19,6 +19,19 @@ module.exports.displayHomePage = (req, res, next) => {
     });
 }
 
+module.exports.displayLoginPage = (req, res, next) => {
+    // check if the user is already logged in
+    if(!req.user)
+    {
+        res.json(
+        {
+           title: "Login",
+           messages: "You are in login page",
+           displayName: req.user ? req.user.displayName : '' 
+        })
+    }
+}
+
 module.exports.processLoginPage = (req, res, next) => {
     passport.authenticate('local',
         (err, user, info) => {
@@ -57,6 +70,19 @@ module.exports.processLoginPage = (req, res, next) => {
                 });
             });
         })(req, res, next);
+}
+
+module.exports.displayRegisterPage = (req, res, next) => {
+    // check if the user is not already logged in
+    if(!req.user)
+    {
+        res.json(
+        {
+            title: 'Register',
+            messages: "You are in register page",
+            displayName: req.user ? req.user.displayName : ''
+        });
+    }
 }
 
 module.exports.processRegisterPage = (req, res, next) => {
