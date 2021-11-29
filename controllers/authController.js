@@ -32,25 +32,22 @@ module.exports.displayLoginPage = (req, res, next) => {
 }
 
 module.exports.processLoginPage = (req, res, next) => {
-           passport.authenticate('local', (err, user, info) => {
-              if (err || !user) {
-                  return res.status(400).json({
-                     message: 'Something is not right',
-                     user: user
-            });
-        }
-           req.login(user, { session: false }, (err) => {
-              if (err) {
-                res.send(err);
+    passport.authenticate('local',
+        (err, user, info) => {
+            // server err?
+            if (err) {
+                return res.status(500).json({ error: true, msg: 'Server encountered Error!' });
             }
-
-            return res.json({
-                success: true, 
+            // is there a user login error?
+            if (!user) {
+                return res.status(500).json({ error: true, msg: 'User failed Logged in!' });
+            }
+            res.json({
+                success: true,
                 msg: 'User Logged in Successfully!',
-                user: user, 
-                token: getJWTToken(newUser.email, newUser.password)
+                user: user,
+                token: getJWTToken(user.email, user.password)
             });
-           });
         }
     )(req, res, next);
 }
