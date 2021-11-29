@@ -45,21 +45,11 @@ module.exports.processLoginPage = (req, res, next) => {
                 res.send(err);
             }
 
-            const payload =
-            {
-                email: user.email,
-                password: user.password,
-            }
-
-            const authToken = jwt.sign(payload, DB.Secret, {
-                expiresIn: 604800 
-            });
-
             res.json({
                 success: true, 
                 msg: 'User Logged in Successfully!',
                 user: user, 
-                token: authToken
+                token: getJWTToken(newUser.email, newUser.password)
             });
            });
         }
