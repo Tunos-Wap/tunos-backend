@@ -32,20 +32,19 @@ module.exports.displayLoginPage = (req, res, next) => {
 }
 
 module.exports.processLoginPage = (req, res, next) => {
-    passport.authenticate('local',
-         passport.authenticate('local', (err, user, info) => {
-        if (err || !user) {
-            return res.status(400).json({
-                message: 'Something is not right',
-                user: user
+           passport.authenticate('local', (err, user, info) => {
+              if (err || !user) {
+                  return res.status(400).json({
+                     message: 'Something is not right',
+                     user: user
             });
         }
-        req.login(user, { session: false }, (err) => {
-            if (err) {
+           req.login(user, { session: false }, (err) => {
+              if (err) {
                 res.send(err);
             }
 
-            res.json({
+            return res.json({
                 success: true, 
                 msg: 'User Logged in Successfully!',
                 user: user, 
