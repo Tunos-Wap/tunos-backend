@@ -2,6 +2,7 @@ let express = require('express');
 let router = express.Router();
 let mongoose = require('mongoose');
 let passport = require('passport');
+let bcrypt = require('bcrypt');
 
 // enable jwt
 let jwt = require('jsonwebtoken');
@@ -31,35 +32,29 @@ module.exports.displayLoginPage = (req, res, next) => {
     }
 }
 
-module.exports.processLoginPage = (req, res, next) => {
-    passport.authenticate('local',
-        (err, user, info) => {
-            // server err?
-            if (err) {
-                return res.status(500).json({ error: true, msg: 'Server encountered Error!' });
-            }
-            // is there a user login error?
-            if (!user) {
-                return res.status(500).json({ error: true, msg: 'User failed Logged in!' });
-            }
-            res.json({
-                success: true,
-                msg: 'User Logged in Successfully!',
-                user: user,
-                token: getJWTToken(user.email, user.password)
-            });
-        }
-    )(req, res, next);
+module.exports.processLoginPage = async (req, res, next) => {
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) return res.status(400).send('Email does not exists.');
+    const invalidpass = await bcrypt.compare(req.body.password, user.password);
+    if (!invalidpass) return res.status(400).send('Invalid password.');
+
+    return res.send({
+        success: true,
+        msg: 'User Logged in Successfully!',
+        userInfo: user,
+        token: getJWTToken(user.email, user.password)
+    });
 }
 
 module.exports.displayRegisterPage = (req, res, next) => {
     // check if the user is not already logged in
     if (!req.user) {
-        res.json({
-            title: 'Register',
-            messages: "You are in register page",
-            displayName: req.user ? req.user.displayName : ''
-        });
+        res.json(
+            {
+                title: 'Register',
+                messages: "You are in register page",
+                displayName: req.user ? req.user.displayName : ''
+            });
     }
 }
 
@@ -70,8 +65,7 @@ module.exports.processRegisterPage = (req, res, next) => {
         password: req.body.password,
         first_name: req.body.first_name,
         last_name: req.body.last_name,
-        phone_number: req.body.phone_number,
-        username: req.body.username
+        phone_number: req.body.phone_number
     });
 
     User.findOne({ email: newUser.email }).then(existingUser => {
@@ -98,7 +92,7 @@ module.exports.performLogout = (req, res, next) => {
     req.logout();
     res.redirect('/');
     req.json({
-        msg: 'You are log out successfully!'
+        msg: 'You are log out successgully!'
     });
 }
 
