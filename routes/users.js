@@ -9,19 +9,29 @@
  
  const usersController = require('../controllers/usersController');
  
+ function requireAuth(req, res, next)
+{
+    // check if the user is logged in
+    if(!req.isAuthenticated())
+    {
+        return res.redirect('/login');
+    }
+    next();
+}
+
  /* GET Route for the Users List - READ Operation */
- router.get('/', usersController.index);
+ router.get('/', requireAuth,usersController.index);
  
  /* GET Route for the Users Details - READ Operation */
- router.get('/:id', usersController.details);
+ router.get('/:id', requireAuth,usersController.details);
  
  /* POST Route for the new Users create - WRITE Operation */
- router.post('/', usersController.create);
+ router.post('/',requireAuth, usersController.create);
  
  /* PUT Route for the existing Users update - WRITE Operation */
- router.put('/:id', usersController.update);
+ router.put('/:id',requireAuth, usersController.update);
  
  /* DELETE Route for the existing Users delete - WRITE Operation */
- router.delete('/:id', usersController.delete);
+ router.delete('/:id',requireAuth, usersController.delete);
 
  module.exports = router;
