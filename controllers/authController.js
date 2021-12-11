@@ -34,9 +34,16 @@ module.exports.displayLoginPage = (req, res, next) => {
 
 module.exports.processLoginPage = async (req, res, next) => {
     const user = await User.findOne({ email: req.body.email });
-    if (!user) return res.status(400).send('Email does not exists.');
-    const invalidpass = await bcrypt.compare(req.body.password, user.password);
-    if (!invalidpass) return res.status(400).send('Invalid password.');
+
+    if (!user) {
+        return res.status(400).send('Email does not exists.')
+    };
+
+    const invalidPass = await bcrypt.compare(req.body.password, user.password);
+
+    if (invalidPass) {
+        return res.status(400).send('Invalid password.')
+    };
 
     return res.send({
         success: true,
@@ -65,7 +72,8 @@ module.exports.processRegisterPage = (req, res, next) => {
         password: req.body.password,
         first_name: req.body.first_name,
         last_name: req.body.last_name,
-        phone_number: req.body.phone_number
+        phone_number: req.body.phone_number,
+        username: req.body.username
     });
 
     User.findOne({ email: newUser.email }).then(existingUser => {
@@ -92,7 +100,7 @@ module.exports.performLogout = (req, res, next) => {
     req.logout();
     res.redirect('/');
     req.json({
-        msg: 'You are log out successgully!'
+        msg: 'You are log out successfully!'
     });
 }
 
