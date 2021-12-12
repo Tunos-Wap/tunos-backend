@@ -10,7 +10,13 @@ let Project = require('../models/project');
  */
 exports.index = (req, res, next) => {
 
-    Project.find({user_id: req.user._id}, (err, projectList) => {
+    var filteredQuery = {user_id: req.user._id};
+
+    if(req.query['status']) {
+        filteredQuery['status'] = req.query['status'];
+    }
+
+    Project.find(filteredQuery, (err, projectList) => {
         if (err) {
             console.error(err);
             return res.send({

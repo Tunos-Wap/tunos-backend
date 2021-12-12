@@ -9,7 +9,14 @@ let Task = require('../models/task');
  * @param next
  */
 exports.index = (req, res, next) => {
-    Task.find({user_id: req.user_id},(err, taskList) => {
+
+    var filteredQuery = {user_id: req.user._id};
+
+    if(req.query['status']) {
+        filteredQuery['status'] = req.query['status'];
+    }
+
+    Task.find(filteredQuery,(err, taskList) => {
         if (err) {
             console.error(err);
             return res.send({
