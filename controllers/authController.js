@@ -49,7 +49,7 @@ module.exports.processLoginPage = async (req, res, next) => {
         success: true,
         msg: 'User Logged in Successfully!',
         userInfo: user,
-        token: getJWTToken(user.email, user.password)
+        token: getJWTToken(user.email, user._id)
     });
 }
 
@@ -87,7 +87,7 @@ module.exports.processRegisterPage = (req, res, next) => {
                     success: true,
                     msg: 'You are Registered Successfully!',
                     userInfo: userNew,
-                    authToken: getJWTToken(newUser.email, newUser.password)
+                    authToken: getJWTToken(newUser.email, newUser.id)
                 });
             }).catch(error => {
                 return res.status(500).json({ error: true, msg: error.message });
@@ -104,10 +104,10 @@ module.exports.performLogout = (req, res, next) => {
     });
 }
 
-function getJWTToken(email, password) {
+function getJWTToken(email, id) {
     const payload = {
         email: email,
-        password: password,
+        id: id,
     }
     const authToken = jwt.sign(payload, DB.Secret, {
         expiresIn: 604800 // 1 week

@@ -9,7 +9,8 @@ let Project = require('../models/project');
  * @param next
  */
 exports.index = (req, res, next) => {
-    Project.find((err, projectList) => {
+
+    Project.find({user_id: req.user._id}, (err, projectList) => {
         if (err) {
             console.error(err);
             return res.send({
@@ -22,7 +23,7 @@ exports.index = (req, res, next) => {
             return res.send({
                 success: true,
                 message: 'Projects successfully found.',
-                data: projectList, 
+                data: projectList,
                 displayName: req.user ? req.user.displayName : ''
             });
         }
@@ -48,10 +49,19 @@ module.exports.details = (req, res, next) => {
             });
         } else {
 
+            var model = project;
+
+            if (model.user_id != req.user._id.toString()) {
+                return res.status(404).send({
+                    success: false,
+                    message: 'Not found.'
+
+                });
+            }
             return res.send({
                 success: true,
                 message: 'Project successfully found.',
-                data: project, 
+                data: project,
                 displayName: req.user ? req.user.displayName : ''
             });
         }
@@ -66,6 +76,8 @@ module.exports.details = (req, res, next) => {
  * @param next
  */
 module.exports.create = (req, res, next) => {
+
+
     const newProject = Project({
         friendly_id: req.body.friendly_id,
         title: req.body.title,
@@ -73,7 +85,7 @@ module.exports.create = (req, res, next) => {
         status: req.body.status,
         start_date: req.body.start_date,
         end_date: req.body.end_date,
-        user_id: req.body.user_id,
+        user_id: req.user._id,
         created_at: new Date(),
         updated_at: new Date(),
     });
@@ -91,7 +103,7 @@ module.exports.create = (req, res, next) => {
         return res.send({
             success: true,
             message: 'Project successfully created.',
-            data: Project, 
+            data: Project,
             displayName: req.user ? req.user.displayName : ''
         });
     });
@@ -105,8 +117,19 @@ module.exports.create = (req, res, next) => {
  * @param res
  * @param next
  */
-module.exports.update = (req, res, next) => {
+module.exports.update = async (req, res, next) => {
     const id = req.params.id;
+
+    var project = await Project.findById(id);
+
+    if (project && project.user_id != req.user._id.toString()) {
+        return res.status(404).send({
+            success: false,
+            message: 'Not found.'
+
+        });
+    }
+
     const updateProject = Project({
         _id: id,
         friendly_id: req.body.friendly_id,
@@ -115,11 +138,11 @@ module.exports.update = (req, res, next) => {
         status: req.body.status,
         start_date: req.body.start_date,
         end_date: req.body.end_date,
-        user_id: req.body.user_id,
+        user_id: req.user._id,
         updated_at: new Date(),
     });
 
-    Project.updateOne({_id: id}, updateProject, err => {
+    project.update({_id: id}, updateProject, err => {
         if (err) {
             console.log(err);
             return res.send({
@@ -132,7 +155,7 @@ module.exports.update = (req, res, next) => {
         return res.send({
             success: true,
             message: 'Project successfully updated.',
-            data: [], 
+            data: [],
             displayName: req.user ? req.user.displayName : ''
         });
     });
@@ -145,7 +168,20 @@ module.exports.update = (req, res, next) => {
  * @param res
  * @param next
  */
-module.exports.delete = (req, res, next) => {
+module.exports.delete = async (req, res, next) => {
+
+    var project = await Project.findById(req.params.id);
+
+    if (project && project.user_id != req.user._id.toString()) {
+
+        return res.status(404).send({
+            success: false,
+            message: 'Not found.'
+
+        });
+    }
+
+
     Project.remove({_id: req.params.id}, err => {
         if (err) {
             console.log(err);
@@ -159,8 +195,9 @@ module.exports.delete = (req, res, next) => {
         return res.send({
             success: true,
             message: 'Project successfully deleted.',
-            data: [], 
+            data: [],
             displayName: req.user ? req.user.displayName : ''
         });
     });
 }
+

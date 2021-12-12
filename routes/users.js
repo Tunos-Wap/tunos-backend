@@ -8,30 +8,12 @@
  var router = express.Router();
  
  const usersController = require('../controllers/usersController');
- 
- function requireAuth(req, res, next)
-{
-    // check if the user is logged in
-    if(!req.isAuthenticated())
-    {
-        return res.redirect('/login');
-    }
-    next();
-}
 
- /* GET Route for the Users List - READ Operation */
- router.get('/', requireAuth,usersController.index);
- 
  /* GET Route for the Users Details - READ Operation */
- router.get('/:id', requireAuth,usersController.details);
- 
- /* POST Route for the new Users create - WRITE Operation */
- router.post('/',requireAuth, usersController.create);
- 
+ router.get('/', usersController.details);
+
  /* PUT Route for the existing Users update - WRITE Operation */
- router.put('/:id',requireAuth, usersController.update);
+ router.put('/update', usersController.update);
  
- /* DELETE Route for the existing Users delete - WRITE Operation */
- router.delete('/:id',requireAuth, usersController.delete);
 
  module.exports = router;

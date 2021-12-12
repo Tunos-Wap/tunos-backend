@@ -13,6 +13,7 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 let cors = require('cors');
 var bodyParser = require('body-parser');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 
@@ -29,25 +30,11 @@ const passportJWT = require('passport-jwt');
 const JWTStrategy = passportJWT.Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
 
-let passportLocal = require('passport-local');
-let localStrategy = passportLocal.Strategy;
 
 // database connection
 const mongoose = require('mongoose');
 const DB = require('./config/db');
 
-// Include Routes.
-const authRouter = require('./routes/auth');
-const projectsRouter = require('./routes/projects');
-const usersRouter = require('./routes/users');
-const tasksRouter = require('./routes/tasks');
-
-app.use(cors());
-
-app.use('/auth', authRouter);
-app.use('/projects', projectsRouter);
-app.use('/users', usersRouter);
-app.use('/tasks', tasksRouter);
 
 // connect to mongoose
 mongoose.connect(DB.URI, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -78,12 +65,10 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+
 // create a User Model Instance
 const userModel = require('./models/user');
 const User = userModel.User;
-
-// implement a User Authentication Strategy
-passport.use(User.createStrategy());
 
 // serialize and deserialize the User info
 passport.serializeUser(User.serializeUser());
@@ -93,10 +78,12 @@ const jwtOptions = {};
 jwtOptions.jwtFromRequest = ExtractJWT.fromAuthHeaderAsBearerToken();
 jwtOptions.secretOrKey = DB.Secret;
 
-const strategy = new JWTStrategy(jwtOptions, (jwt_payload, done) => {
+const strategy = new JWTStrategy(jwtOptions, async (jwt_payload, done) => {
+
+    console.log(jwt_payload);
     User.findById(jwt_payload.id)
         .then(user => {
-            return done(null, user);
+            done(null, user);
         })
         .catch(err => {
             return done(err, false);
@@ -105,10 +92,24 @@ const strategy = new JWTStrategy(jwtOptions, (jwt_payload, done) => {
 
 passport.use(strategy);
 
+
+// Include Routes.
+const authRouter = require('./routes/auth');
+const projectsRouter = require('./routes/projects');
+const usersRouter = require('./routes/users');
+const tasksRouter = require('./routes/tasks');
+
+app.use(cors());
+
+app.use('/auth', authRouter);
+app.use('/projects',passport.authenticate('jwt', { session: false }), projectsRouter);
+app.use('/users',passport.authenticate('jwt', { session: false }), usersRouter);
+app.use('/tasks',passport.authenticate('jwt', { session: false }), tasksRouter);
+
 // catch 404 and forward to error handler
-/* app.use(function (req, res, next) {
+/*app.use(function (req, res, next) {
     next(createError(404));
-}); */
+})*/;
 
 // error handler
 app.use(function (err, req, res, next) {

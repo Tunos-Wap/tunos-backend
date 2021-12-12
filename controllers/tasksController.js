@@ -9,7 +9,7 @@ let Task = require('../models/task');
  * @param next
  */
 exports.index = (req, res, next) => {
-    Task.find((err, taskList) => {
+    Task.find({user_id: req.user_id},(err, taskList) => {
         if (err) {
             console.error(err);
             return res.send({
@@ -37,7 +37,10 @@ exports.index = (req, res, next) => {
  * @param next
  */
 module.exports.details = (req, res, next) => {
+
+
     Task.findById(req.params.id, (err, task) => {
+
         if (err) {
             console.error(err);
 
@@ -47,6 +50,16 @@ module.exports.details = (req, res, next) => {
                 data: []
             });
         } else {
+
+            var model = task;
+
+            if (model.user_id != req.user._id.toString()) {
+                return res.status(404).send({
+                    success: false,
+                    message: 'Not found.'
+
+                });
+            }
 
             return res.send({
                 success: true,
@@ -71,11 +84,11 @@ module.exports.create = (req, res, next) => {
         summary: req.body.summary,
         status: req.body.status,
         priority: req.body.priority,
-        created_by: req.body.created_by,
         assigned_user: req.body.assigned_user,
         start_date: req.body.start_date,
         end_date: req.body.end_date,
         project_id: req.body.project_id,
+        created_by: req.user._id,
         created_at: new Date(),
         updated_at: new Date(),
     });
@@ -107,15 +120,25 @@ module.exports.create = (req, res, next) => {
  * @param res
  * @param next
  */
-module.exports.update = (req, res, next) => {
+module.exports.update = async (req, res, next) => {
+
     const id = req.params.id;
+    var task = await Task.findById(id);
+
+    if (task && task.created_by != req.user._id.toString()) {
+        return res.status(404).send({
+            success: false,
+            message: 'Not found.'
+
+        });
+    }
+
     const updateTask = Task({
         _id: id,
         title: req.body.title,
         summary: req.body.summary,
         status: req.body.status,
         priority: req.body.priority,
-        created_by: req.body.created_by,
         assigned_user: req.body.assigned_user,
         start_date: req.body.start_date,
         end_date: req.body.end_date,
@@ -136,7 +159,7 @@ module.exports.update = (req, res, next) => {
         return res.send({
             success: true,
             message: 'Task successfully updated.',
-            data: [], 
+            data: [],
             displayName: req.user ? req.user.displayName : ''
         });
     });
@@ -149,7 +172,19 @@ module.exports.update = (req, res, next) => {
  * @param res
  * @param next
  */
-module.exports.delete = (req, res, next) => {
+module.exports.delete = async (req, res, next) => {
+
+    var task = await Task.findById(req.params.id);
+
+    if (task && task.created_by != req.user._id.toString()) {
+
+        return res.status(404).send({
+            success: false,
+            message: 'Not found.'
+
+        });
+    }
+
     Task.remove({_id: req.params.id}, err => {
         if (err) {
             console.log(err);
@@ -163,7 +198,7 @@ module.exports.delete = (req, res, next) => {
         return res.send({
             success: true,
             message: 'Task successfully deleted.',
-            data: [], 
+            data: [],
             displayName: req.user ? req.user.displayName : ''
         });
     });
