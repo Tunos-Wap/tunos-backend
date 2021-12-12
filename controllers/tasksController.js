@@ -16,6 +16,10 @@ exports.index = (req, res, next) => {
         filteredQuery['status'] = req.query['status'];
     }
 
+    if(req.query['project_id']) {
+        filteredQuery['project'] = req.query['project_id'];
+    }
+
     Task.find(filteredQuery,(err, taskList) => {
         if (err) {
             console.error(err);

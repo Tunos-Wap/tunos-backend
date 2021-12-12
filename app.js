@@ -80,7 +80,6 @@ jwtOptions.secretOrKey = DB.Secret;
 
 const strategy = new JWTStrategy(jwtOptions, async (jwt_payload, done) => {
 
-    console.log(jwt_payload);
     User.findById(jwt_payload.id)
         .then(user => {
             done(null, user);
