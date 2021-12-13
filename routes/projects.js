@@ -17,12 +17,12 @@ router.get('/', projectsController.index);
 router.get('/:id', projectsController.details);
 
 /* POST Route for the new Projects create - WRITE Operation */
-router.post('/', projectsController.create);
+router.post('/create', projectsController.create);
 
 /* PUT Route for the existing Projects update - WRITE Operation */
-router.put('/:id', projectsController.update);
+router.put('/update/:id', projectsController.update);
 
 /* DELETE Route for the existing Projects delete - WRITE Operation */
-router.delete('/:id', projectsController.delete);
+router.delete('/delete/:id', projectsController.delete);
 
 module.exports = router;
