@@ -41,7 +41,6 @@ module.exports.update = (req, res, next) => {
     const updateUser = User({
         _id: req.user._id,
         email: req.body.email,
-        password: req.body.password,
         first_name: req.body.first_name,
         last_name: req.body.last_name,
         phone_number: req.body.phone_number,
