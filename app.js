@@ -5,7 +5,7 @@
  * Student Name (Revised on user login): Shenkai Feng
  * Date: 02-10-2021
  */
-
+require('dotenv').config();
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
