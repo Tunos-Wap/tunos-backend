@@ -11,7 +11,7 @@ var router = express.Router();
 const tasksController = require('../controllers/tasksController');
 
 /* GET Route for the Tasks List - READ Operation */
-router.post('/', tasksController.index);
+router.get('/', tasksController.index);
 
 /* GET Route for the Tasks Details - READ Operation */
 router.get('/:id', tasksController.details);
